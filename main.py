@@ -1,7 +1,5 @@
 import tkinter as tk
 
-from tklinenums import TkLineNumbers
-
 from text_editor import TextWithLineNumbers
 
 

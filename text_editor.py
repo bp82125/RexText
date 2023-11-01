@@ -46,18 +46,19 @@ class CustomText(tk.Text):
     def __init__(self, *args, **kwargs):
         tk.Text.__init__(self, *args, **kwargs)
 
-        # create a proxy for the underlying widget
+        # Tạo một proxy(design pattern) để handle quá trình tcl accpet và response với thao tác người dùng
+        # self._w là tên của widget
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
 
     def _proxy(self, *args):
-        # let the actual widget perform the requested action
+
+        # Thực hiện thao tác của người dùng như bình thường
         cmd = (self._orig,) + args
         result = self.tk.call(cmd)
 
-        # generate an event if something was added or deleted,
-        # or the cursor position changed
+        # Tạo 1 event nếu có hành động thêm, hoặc xoá, hoặc vị trí cursor thay đổi
         if (args[0] in ("insert", "replace", "delete") or
                 args[0:3] == ("mark", "set", "insert") or
                 args[0:2] == ("xview", "moveto") or
@@ -67,7 +68,7 @@ class CustomText(tk.Text):
         ):
             self.event_generate("<<Change>>", when="tail")
 
-        # return what the actual widget returned
+        # Trả về kết quả hành động người dùng như bình thường
         return result
 
 
