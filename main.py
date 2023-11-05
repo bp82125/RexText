@@ -1,6 +1,7 @@
 import tkinter as tk
 
-from text_editor import TextWithLineNumbers
+from search import Search
+from text_editor import CustomText
 
 
 class Main(tk.Frame):
@@ -8,7 +9,10 @@ class Main(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
-        self.text_widget = TextWithLineNumbers(self)
+        self.text_widget = CustomText(self)
+        self.search = Search(self)
+
+        self.search.pack(side="top")
         self.text_widget.pack(side="top", fill="both", expand=True)
 
 

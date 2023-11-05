@@ -90,7 +90,9 @@ class CustomText(tk.Frame):
         self._line_numbers.grid(row=0, column=0, sticky="ns")
 
         self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=0)
 
         self._text.bind("<<Change>>", self._on_change)
         self._text.bind("<Configure>", self._on_change)
