@@ -42,7 +42,7 @@ class TextLineNumbers(tk.Canvas):
             i = self.text_widget.index(f'{i}+1line')
 
 
-class CustomText(tk.Text):
+class TextWithProxy(tk.Text):
     def __init__(self, *args, **kwargs):
         tk.Text.__init__(self, *args, **kwargs)
 
@@ -53,7 +53,6 @@ class CustomText(tk.Text):
         self.tk.createcommand(self._w, self._proxy)
 
     def _proxy(self, *args):
-
         # Thực hiện thao tác của người dùng như bình thường
         cmd = (self._orig,) + args
         result = self.tk.call(cmd)
@@ -72,22 +71,36 @@ class CustomText(tk.Text):
         return result
 
 
-class TextWithLineNumbers(tk.Frame):
+class CustomText(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-        self.text = CustomText(self)
-        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.text.yview)
-        self.text.configure(yscrollcommand=self.vsb.set)
 
-        self.line_numbers = TextLineNumbers(self, width=30)
-        self.line_numbers.attach(self.text)
+        self._text = TextWithProxy(self, wrap="none", borderwidth=0)
+        self._text_vsb = tk.Scrollbar(self, orient="vertical", command=self._text.yview)
+        self._text_hsb = tk.Scrollbar(self, orient="horizontal", command=self._text.xview)
+        self._text.configure(yscrollcommand=self._text_vsb.set, xscrollcommand=self._text_hsb.set)
 
-        self.vsb.pack(side="right", fill="y")
-        self.line_numbers.pack(side="left", fill="y")
-        self.text.pack(side="right", fill="both", expand=True)
+        self._line_numbers = TextLineNumbers(self, width=40)
+        self._line_numbers.attach(self._text)
 
-        self.text.bind("<<Change>>", self._on_change)
-        self.text.bind("<Configure>", self._on_change)
+        self._text.grid(row=0, column=1, sticky="nsew")
+        self._text_vsb.grid(row=0, column=2, sticky="ns")
+        self._text_hsb.grid(row=1, column=1, sticky="ew")
+
+        self._line_numbers.grid(row=0, column=0, sticky="ns")
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self._text.bind("<<Change>>", self._on_change)
+        self._text.bind("<Configure>", self._on_change)
 
     def _on_change(self, event):
-        self.line_numbers.redraw()
+        self._line_numbers.redraw()
+
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    CustomText(root).pack(side="top", fill="both", expand=True)
+    root.mainloop()
+

@@ -9,7 +9,7 @@ class Main(tk.Frame):
         self.parent = parent
 
         self.text_widget = TextWithLineNumbers(self)
-        self.text_widget.pack()
+        self.text_widget.pack(side="top", fill="both", expand=True)
 
 
 class MainApplication(tk.Frame):
@@ -18,7 +18,7 @@ class MainApplication(tk.Frame):
         self.parent = parent
 
         self.main = Main(self)
-        self.main.pack()
+        self.main.pack(expand=True, fill="both")
 
 
 if __name__ == "__main__":
