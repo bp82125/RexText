@@ -5,8 +5,9 @@ from tkinter import ttk
 
 # Kế thừa từ Canvas
 class TextLineNumbers(tk.Canvas):
-    def __init__(self, *args, **kwargs):
-        tk.Canvas.__init__(self, *args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        tk.Canvas.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
         self.text_widget = None
 
     def attach(self, text_widget):
@@ -45,8 +46,9 @@ class TextLineNumbers(tk.Canvas):
 
 
 class TextWithProxy(tk.Text):
-    def __init__(self, *args, **kwargs):
-        tk.Text.__init__(self, *args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        tk.Text.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
 
         # Tạo một proxy(design pattern) để handle quá trình tcl accpet và response với thao tác người dùng
         # self._w là tên của widget
@@ -56,14 +58,13 @@ class TextWithProxy(tk.Text):
 
     def _proxy(self, command, *args):
 
-        # if command == 'get' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
-        #         'sel'):
-        #     return
-        #
-        # # avoid error when deleting
-        # if command == 'delete' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
-        #         'sel'):
-        #     return
+        if command == 'get' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
+                'sel'):
+            return
+
+        if command == 'delete' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
+                'sel'):
+            return
 
         # Thực hiện thao tác của người dùng như bình thường
         cmd = (self._orig, command) + args
@@ -83,17 +84,17 @@ class TextWithProxy(tk.Text):
         # Trả về kết quả hành động người dùng như bình thường
         return result
 
-    def highlight(self, tag, start, end):
+    def add_tag_with_pos(self, tag, start, end):
         self.tag_add(tag, start, end)
 
-    def highlight_all(self, pattern, tag):
+    def apply_tag_to_all(self, pattern, tag):
         all_matches = self.search_re(pattern)
         for match in all_matches:
-            self.highlight(tag, match[0], match[1])
+            self.add_tag_with_pos(tag, match[0], match[1])
 
         return all_matches
 
-    def clean_highlights(self, tag):
+    def clean_all_tag(self, tag):
         self.tag_remove(tag, "1.0", tk.END)
 
     def search_re(self, pattern):
@@ -105,21 +106,42 @@ class TextWithProxy(tk.Text):
 
         return matches
 
+    def next_match(self, current_pos, pattern):
+        cursor_row = int(current_pos.split(".")[0])
+        cursor_col = int(current_pos.split(".")[1])
+
+        lower_text = self.get(f'{cursor_row}.0', tk.END).splitlines()
+
+        for i, line in enumerate(lower_text):
+            for match in re.finditer(pattern, line):
+                if i == 0 and match.end() <= cursor_col:
+                    continue
+                return f"{cursor_row + i}.{match.start()}", f"{cursor_row + i}.{match.end()}"
+
+        #     End of line but still not find matches
+
+        upper_text = self.get("1.0", f'{cursor_row}.end').splitlines()
+        for i, line in enumerate(upper_text):
+            for match in re.finditer(pattern, line):
+                return f"{i + 1}.{match.start()}", f"{i + 1}.{match.end()}"
+
     def highlight_pattern(self, pattern, tag="match"):
-        self.clean_highlights(tag)
-        return self.highlight_all(pattern, tag)
+        self.clean_all_tag(tag)
+        return self.apply_tag_to_all(pattern, tag)
 
 
 class CustomText(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
 
         self._text = TextWithProxy(self, wrap="none", borderwidth=0)
         self._text_vsb = ttk.Scrollbar(self, orient="vertical", command=self._text.yview)
         self._text_hsb = ttk.Scrollbar(self, orient="horizontal", command=self._text.xview)
         self._text.configure(yscrollcommand=self._text_vsb.set, xscrollcommand=self._text_hsb.set)
 
-        self._text.tag_config("match", background="yellow")
+        self._text.tag_config("match", background="yellow", foreground="black")
+        self._text.tag_raise("sel")
 
         self._line_numbers = TextLineNumbers(self, width=50)
         self._line_numbers.attach(self._text)
@@ -148,6 +170,10 @@ class CustomText(tk.Frame):
         line = location[0]
         column = location[1]
         self._text.mark_set("insert", "%d.%d" % (line + 1, column + 1))
+
+    @property
+    def text_area(self):
+        return self._text
 
 
 if __name__ == '__main__':

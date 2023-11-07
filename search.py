@@ -37,6 +37,14 @@ class Search(ttk.Frame):
     def get_entry(self):
         return self._input.get()
 
+    @property
+    def find_next(self):
+        return self._find_next
+
+    @property
+    def search_button(self):
+        return self._search_button
+
 
 if __name__ == '__main__':
     root = tk.Tk()
