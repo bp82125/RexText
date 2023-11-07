@@ -1,4 +1,6 @@
+import re
 import tkinter as tk
+from tkinter import ttk
 
 
 # Kế thừa từ Canvas
@@ -36,7 +38,7 @@ class TextLineNumbers(tk.Canvas):
             line_num = str(i).split(".")[0]
 
             # Thêm só đánh số dòng vào, thụt vào bên trái 2px, và cách góc trên y px
-            self.create_text(2, y, anchor="nw", text=line_num)
+            self.create_text(self.winfo_width() - 10, y, anchor="ne", text=line_num)
 
             # i trỏ đến dòng kế tiếp
             i = self.text_widget.index(f'{i}+1line')
@@ -52,9 +54,19 @@ class TextWithProxy(tk.Text):
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
 
-    def _proxy(self, *args):
+    def _proxy(self, command, *args):
+
+        # if command == 'get' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
+        #         'sel'):
+        #     return
+        #
+        # # avoid error when deleting
+        # if command == 'delete' and (args[0] == 'sel.first' and args[1] == 'sel.last') and not self.tag_ranges(
+        #         'sel'):
+        #     return
+
         # Thực hiện thao tác của người dùng như bình thường
-        cmd = (self._orig,) + args
+        cmd = (self._orig, command) + args
         result = self.tk.call(cmd)
 
         # Tạo 1 event nếu có hành động thêm, hoặc xoá, hoặc vị trí cursor thay đổi
@@ -65,10 +77,37 @@ class TextWithProxy(tk.Text):
                 args[0:2] == ("yview", "moveto") or
                 args[0:2] == ("yview", "scroll")
         ):
-            self.event_generate("<<Change>>", when="tail")
+            self.event_generate("<<Change>>")
+            self.event_generate("<<Highlight>>")
 
         # Trả về kết quả hành động người dùng như bình thường
         return result
+
+    def highlight(self, tag, start, end):
+        self.tag_add(tag, start, end)
+
+    def highlight_all(self, pattern, tag):
+        all_matches = self.search_re(pattern)
+        for match in all_matches:
+            self.highlight(tag, match[0], match[1])
+
+        return all_matches
+
+    def clean_highlights(self, tag):
+        self.tag_remove(tag, "1.0", tk.END)
+
+    def search_re(self, pattern):
+        matches = []
+        text = self.get("1.0", tk.END).splitlines()
+        for i, line in enumerate(text):
+            for match in re.finditer(pattern, line):
+                matches.append((f"{i + 1}.{match.start()}", f"{i + 1}.{match.end()}"))
+
+        return matches
+
+    def highlight_pattern(self, pattern, tag="match"):
+        self.clean_highlights(tag)
+        return self.highlight_all(pattern, tag)
 
 
 class CustomText(tk.Frame):
@@ -76,11 +115,13 @@ class CustomText(tk.Frame):
         tk.Frame.__init__(self, *args, **kwargs)
 
         self._text = TextWithProxy(self, wrap="none", borderwidth=0)
-        self._text_vsb = tk.Scrollbar(self, orient="vertical", command=self._text.yview)
-        self._text_hsb = tk.Scrollbar(self, orient="horizontal", command=self._text.xview)
+        self._text_vsb = ttk.Scrollbar(self, orient="vertical", command=self._text.yview)
+        self._text_hsb = ttk.Scrollbar(self, orient="horizontal", command=self._text.xview)
         self._text.configure(yscrollcommand=self._text_vsb.set, xscrollcommand=self._text_hsb.set)
 
-        self._line_numbers = TextLineNumbers(self, width=40)
+        self._text.tag_config("match", background="yellow")
+
+        self._line_numbers = TextLineNumbers(self, width=50)
         self._line_numbers.attach(self._text)
 
         self._text.grid(row=0, column=1, sticky="nsew")
@@ -100,9 +141,16 @@ class CustomText(tk.Frame):
     def _on_change(self, event):
         self._line_numbers.redraw()
 
+    def highlight_match(self, pattern):
+        return self._text.highlight_pattern(pattern)
+
+    def relocate_cursor(self, location):
+        line = location[0]
+        column = location[1]
+        self._text.mark_set("insert", "%d.%d" % (line + 1, column + 1))
+
 
 if __name__ == '__main__':
     root = tk.Tk()
     CustomText(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
-
