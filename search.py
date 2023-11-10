@@ -13,12 +13,12 @@ class Search(ttk.Frame):
         self._search_button = ttk.Button(self, text="Search")
         self._find_next = ttk.Button(self, text="Find next")
 
-        self._input.grid(row=0, column=1, padx=20, pady=10, ipady=3)
-        self._search_button.grid(row=0, column=2, padx=20, pady=10)
-        self._find_next.grid(row=0, column=3, padx=20, pady=10)
+        self._input.grid(row=0, column=1, padx=55, pady=10, ipady=3, sticky="nsew")
+        self._search_button.grid(row=0, column=2, padx=20, pady=10, sticky="nsew")
+        self._find_next.grid(row=0, column=3, padx=20, pady=10, sticky="nsew")
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(4, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        # self.grid_columnconfigure(4, weight=1)
 
         self._input.bind("<FocusIn>", lambda event: self.handle_focus_in())
         self._input.bind("<FocusOut>", lambda event: self.handle_focus_out())
@@ -36,6 +36,14 @@ class Search(ttk.Frame):
 
     def get_entry(self):
         return self._input.get()
+
+    @property
+    def find_next(self):
+        return self._find_next
+
+    @property
+    def search_button(self):
+        return self._search_button
 
 
 if __name__ == '__main__':
