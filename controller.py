@@ -20,7 +20,7 @@ class Controller(tk.Frame):
         self._search.find_next.configure(command=self.find_next)
 
     def highlight_text(self):
-        pattern = self._search.get_entry()
+        pattern = self._search.get_entry
         all_matches = self._text_widget.highlight_match(pattern)
 
         if len(all_matches) == 0:
@@ -33,7 +33,7 @@ class Controller(tk.Frame):
         self._text_widget.text_area.clean_all_tag("match")
 
     def find_next(self):
-        pattern = self._search.get_entry()
+        pattern = self._search.get_entry
 
         cursor_pos = self._text_widget.text_area.index(tk.INSERT)
 
