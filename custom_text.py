@@ -3,15 +3,20 @@ import tkinter as tk
 from tkinter import ttk
 
 
+
+#đánh số
 # Kế thừa từ Canvas
 class TextLineNumbers(tk.Canvas):
     def __init__(self, parent, *args, **kwargs):
         tk.Canvas.__init__(self, parent, *args, **kwargs)
-        self.parent = parent
-        self.text_widget = None
+        self._parent = parent
+        self._text_widget = None
 
+    @property
+    def text_widget(self):
+        return self._text_widget
     def attach(self, text_widget):
-        self.text_widget = text_widget
+        self._text_widget = text_widget
 
     def redraw(self):
         # Xoá hết các đánh số dòng hiện tại
@@ -19,11 +24,11 @@ class TextLineNumbers(tk.Canvas):
 
         # lấy thứ tự của dòng đầu tiên hiện tại trên Text
         # Ví dụ: hàng trên cùng hiện tại là hàng thứ 17 thì i = "17.0"
-        i = self.text_widget.index("@0,0")
+        i = self._text_widget.index("@0,0")
         while True:
             # dline = (x, y, width, height, baseline)
             # x, y là toạ độ của dòng hiện tại bên Text
-            dline = self.text_widget.dlineinfo(i)
+            dline = self._text_widget.dlineinfo(i)
 
             # Hiện tại đang quá cuối màn hình
             if dline is None:
@@ -42,7 +47,7 @@ class TextLineNumbers(tk.Canvas):
             self.create_text(self.winfo_width() - 10, y, anchor="ne", text=line_num)
 
             # i trỏ đến dòng kế tiếp
-            i = self.text_widget.index(f'{i}+1line')
+            i = self._text_widget.index(f'{i}+1line')
 
 
 class TextWithProxy(tk.Text):
@@ -172,7 +177,9 @@ class CustomText(tk.Frame):
         return self._text
 
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    CustomText(root).pack(side="top", fill="both", expand=True)
-    root.mainloop()
+# if __name__ == '__main__':
+#     root = tk.Tk()
+#     CustomText(root).pack(side="top", fill="both", expand=True)
+#     root.mainloop()
+
+
