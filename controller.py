@@ -46,6 +46,8 @@ class Controller(tk.Frame):
         match_start = next_match[0]
         match_end = next_match[1]
 
+        self.text_widget.text_area.see(match_end)
+
         self.text_widget.text_area.focus_set()
         self.text_widget.text_area.tag_remove("match", match_start, match_end)
 
