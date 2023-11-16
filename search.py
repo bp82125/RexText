@@ -46,7 +46,7 @@ class Search(ttk.Frame):
         return self._search_button
 
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    Search(root).pack(side="top", fill="both", expand=True)
-    root.mainloop()
+# if __name__ == '__main__':
+#     root = tk.Tk()
+#     Search(root).pack(side="top", fill="both", expand=True)
+#     root.mainloop()
