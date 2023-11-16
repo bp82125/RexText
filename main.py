@@ -8,10 +8,10 @@ class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
-    
+
         self.menubar = tk.Menu()
         self.parent.config(menu=self.menubar)
-        
+
         self.sub_menu_file = tk.Menu(self.menubar, tearoff=False)
         self.sub_menu_file.add_command(label="   Open   ", command=self.open_file)
         self.sub_menu_file.add_command(label="   Save As   ", command=self.save_file)
@@ -20,9 +20,7 @@ class MainApplication(tk.Frame):
         self.sub_menu_file.add_command(label="   Exit   ", command=self.exit_file)
         self.menubar.add_cascade(label="File", menu=self.sub_menu_file)
 
-
-
-        self.controller = Controller(self)   
+        self.controller = Controller(self)
         self.controller.pack(side="bottom", fill="both", expand=True)
 
         self.edit_menu = tk.Menu(self.menubar, tearoff=0)
@@ -49,6 +47,7 @@ class MainApplication(tk.Frame):
     def new_file(self):
         self.controller.text_widget.text_area.delete(1.0, tk.END)
         self.reset_changes()
+
     def open_file(self):
         file_path = fd.askopenfilename()
         if file_path:
@@ -58,12 +57,13 @@ class MainApplication(tk.Frame):
                 self.reset_changes()
 
     def save_file(self):
-        file_path = tk.filedialog.asksaveasfilename(filetypes=(("Text files", "*.txt"),("All files", "*.")), defaultextension=".txt")
+        file_path = fd.asksaveasfilename(filetypes=(("Text files", "*.txt"), ("All files", "*.")),
+                                                    defaultextension=".txt")
         if file_path:
             with open(file_path, 'w') as file:
                 file.write(self.controller.text_widget.text_area.get(1.0, tk.END))
                 self.reset_changes()
-                
+
     def exit_file(self):
         self.parent.destroy()
 
@@ -71,6 +71,7 @@ class MainApplication(tk.Frame):
         self.parent.clipboard_clear()
         text = self.controller.text_widget.text_area.get("sel.first", "sel.last")
         self.parent.clipboard_append(text)
+
     def cut_text(self):
         self.copy_text()
         self.controller.text_widget.text_area.delete("sel.first", "sel.last")
@@ -110,15 +111,17 @@ class MainApplication(tk.Frame):
             self.changes = self.changes[: self.current_change + 1]
             self.changes.append(content)
             self.current_change = len(self.changes) - 1
+
     def reset_changes(self):
         self.changes = []
         self.current_change = -1
 
+
 if __name__ == '__main__':
     root = tk.Tk()
-    
+
     root.title(" RegText - A minimal text editor with Regex support searching")
     root.minsize(400, 300)
-    
+
     MainApplication(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
