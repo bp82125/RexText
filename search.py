@@ -24,16 +24,17 @@ class Search(ttk.Frame):
         self._input.bind("<FocusOut>", lambda event: self.handle_focus_out())
 
     def handle_focus_in(self):
-        if self.get_entry() == "Regex":
+        if self.get_entry == "Regex":
             self._input.delete(0, tk.END)
         self._input.config(foreground='black')
 
     def handle_focus_out(self):
-        if len(self.get_entry()) <= 0:
+        if len(self.get_entry) <= 0:
             self._input.delete(0, tk.END)
             self._input.insert(0, "Regex")
             self._input.config(foreground='grey')
 
+    @property
     def get_entry(self):
         return self._input.get()
 

@@ -3,6 +3,7 @@ from tkinter import filedialog as fd
 
 from controller import Controller
 
+
 class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -37,14 +38,14 @@ class MainApplication(tk.Frame):
         self._typing = False
 
         # Trace changes to update undo and redo buttons
-        self._controller._text_widget.text_area.bind("<KeyRelease>", self.on_key_press)
+        self._controller.text_widget.text_area.bind("<KeyRelease>", self.on_key_press)
 
         self._parent.bind("<Control-n>", lambda event: self.new_file())
         self._parent.bind("<Control-s>", lambda event: self.save_file())
         self._parent.bind("<Control-o>", lambda event: self.open_file())
 
     def new_file(self):
-        self._controller._text_widget.text_area.delete(1.0, tk.END)
+        self._controller.text_widget.text_area.delete(1.0, tk.END)
         self.reset_changes()
 
     def open_file(self):
@@ -57,10 +58,10 @@ class MainApplication(tk.Frame):
 
     def save_file(self):
         file_path = fd.asksaveasfilename(filetypes=(("Text files", "*.txt"), ("All files", "*.")),
-                                                    defaultextension=".txt")
+                                         defaultextension=".txt")
         if file_path:
             with open(file_path, 'w') as file:
-                file.write(self._controller._text_widget.text_area.get(1.0, tk.END))
+                file.write(self._controller.text_widget.text_area.get(1.0, tk.END))
                 self.reset_changes()
 
     def exit_file(self):
@@ -68,43 +69,44 @@ class MainApplication(tk.Frame):
 
     def copy_text(self):
         self._parent.clipboard_clear()
-        text = self._controller._text_widget.text_area.get("sel.first", "sel.last")
+        text = self._controller.text_widget.text_area.get("sel.first", "sel.last")
         self._parent.clipboard_append(text)
 
     def cut_text(self):
         self.copy_text()
-        self._controller._text_widget.text_area.delete("sel.first", "sel.last")
+        self._controller.text_widget.text_area.delete("sel.first", "sel.last")
         self.add_change()
 
     def paste_text(self):
         text = self._parent.clipboard_get()
-        self._controller._text_widget.text_area.insert(tk.INSERT, text)
+        self._controller.text_widget.text_area.insert(tk.INSERT, text)
         self.add_change()
 
     def undo_text(self):
         if self._current_change > 0:
             self._applying_changes = True
             self._current_change -= 1
-            self._controller._text_widget.text_area.delete(1.0, tk.END)
-            self._controller._text_widget.text_area.insert(tk.END, self._changes[self._current_change])
+            self._controller.text_widget.text_area.delete(1.0, tk.END)
+            self._controller.text_widget.text_area.insert(tk.END, self._changes[self._current_change])
             self._applying_changes = False
 
     def redo_text(self):
         if self._current_change < len(self._changes) - 1:
             self._applying_changes = True
             self._current_change += 1
-            self._controller._text_widget.text_area.delete(1.0, tk.END)
-            self._controller._text_widget.text_area.insert(tk.END, self._changes[self._current_change])
+            self._controller.text_widget.text_area.delete(1.0, tk.END)
+            self._controller.text_widget.text_area.insert(tk.END, self._changes[self._current_change])
             self._applying_changes = False
 
     def on_key_press(self, event):
+
         if not self._typing:
             self._typing = True
             self.add_change()
         self._typing = False
 
     def add_change(self):
-        content = self._controller._text_widget.text_area.get(1.0, tk.END)
+        content = self._controller.text_widget.text_area.get(1.0, tk.END)
         # Remove the changes after the current change index
         if not self._changes or content != self._changes[self._current_change]:
             self._changes = self._changes[: self._current_change + 1]
