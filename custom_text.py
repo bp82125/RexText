@@ -3,8 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 
-
-#đánh số
+# đánh số
 # Kế thừa từ Canvas
 class TextLineNumbers(tk.Canvas):
     def __init__(self, parent, *args, **kwargs):
@@ -15,6 +14,7 @@ class TextLineNumbers(tk.Canvas):
     @property
     def text_widget(self):
         return self._text_widget
+
     def attach(self, text_widget):
         self._text_widget = text_widget
 
@@ -65,7 +65,7 @@ class TextWithProxy(tk.Text):
 
         # Thực hiện thao tác của người dùng như bình thường
         cmd = (self._orig,) + args
-        
+
         try:
             result = self.tk.call(cmd)
         except Exception:
@@ -81,6 +81,8 @@ class TextWithProxy(tk.Text):
         ):
             self.event_generate("<<Change>>", when="tail")
             self.event_generate("<<Highlight>>")
+
+            self.clean_all_tag("match")
 
         # Trả về kết quả hành động người dùng như bình thường
         return result
@@ -176,10 +178,7 @@ class CustomText(tk.Frame):
     def text_area(self):
         return self._text
 
-
 # if __name__ == '__main__':
 #     root = tk.Tk()
 #     CustomText(root).pack(side="top", fill="both", expand=True)
 #     root.mainloop()
-
-

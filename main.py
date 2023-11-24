@@ -15,7 +15,7 @@ class MainApplication(tk.Frame):
         self._sub_menu_file = tk.Menu(self._menubar, tearoff=False)
         self._sub_menu_file.add_command(label="   Open   ", command=self.open_file)
         self._sub_menu_file.add_command(label="   Save As   ", command=self.save_file)
-        self._sub_menu_file.add_command(label="  New file    ", command=self.new_file)
+        self._sub_menu_file.add_command(label="   New file    ", command=self.new_file)
         self._sub_menu_file.add_separator()
         self._sub_menu_file.add_command(label="   Exit   ", command=self.exit_file)
         self._menubar.add_cascade(label="File", menu=self._sub_menu_file)

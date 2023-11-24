@@ -35,12 +35,16 @@ class Controller(tk.Frame):
     def find_next(self):
         pattern = self._search.get_entry
 
+        if pattern is None or pattern == "":
+            messagebox.showinfo("showinfo", f"There are no matches in the entire file.")
+
         cursor_pos = self._text_widget.text_area.index(tk.INSERT)
 
         next_match = self._text_widget.text_area.next_match(cursor_pos, pattern)
 
         if next_match is None:
             self._text_widget.text_area.clean_all_tag("match")
+            messagebox.showinfo("showinfo", f"There are no matches in the entire file.")
             return
 
         match_start = next_match[0]
@@ -64,7 +68,6 @@ class Controller(tk.Frame):
     @property
     def search(self):
         return self._search
-
 
 # if __name__ == "__main__":
 #     root = tk.Tk()
