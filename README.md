@@ -1,6 +1,6 @@
 # Minimal Text Editor with Regex in Python
 
-This repository contains a minimal text editor built in Python using the Tkinter library. The text editor includes functionality for searching and matching text using regular expressions (regex).
+This repository contains a minimal text editor built in Python using the Tkinter library for the CT121 Automata course. The text editor includes functionality for searching and matching text using Regular Expressions (regex).
 
 ## Features:
 - **Text Editing:** Edit and manipulate text easily within the editor.
